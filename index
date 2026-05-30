@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miracle Hotel Addis Ababa - Elite Concierge Ecosystem</title>
+    
+    <!-- Chart.js for Executive Analytics -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+    <!-- Firebase App and Database SDKs (v9 Compatibility CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+    <style>
+        /* --- Luxury Premium Design System --- */
+        :root {
+            --primary: #0a0c10;      /* Ultra Deep Obsidian */
+            --surface: #12151c;      /* Dark Slate Surface */
+            --surface-card: #1c202b; /* Elevated Card */
+            --accent: #d4af37;       /* Metallic Gold */
+            --accent-hover: #f3e5ab; /* Silk Cream Gold */
+            --text-main: #f3f4f6;    /* Off-White */
+            --text-muted: #9ca3af;   /* Muted Silver */
+            --success: #10b981;      /* Emerald */
+            --danger: #f43f5e;       /* Crimson Rose */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Playfair Display', 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background-color: var(--primary);
+            color: var(--text-main);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-height: 100vh;
+        }
+
+        @media(min-width: 768px) {
+            body { padding: 25px; gap: 25px; }
+        }
+
+        /* --- Custom Scrollbar --- */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--primary); }
+        ::-webkit-scrollbar-thumb { background: var(--surface-card); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+        /* --- Global Portal Controller Matrix --- */
+        .portal-selector {
+            background: linear-gradient(135deg, var(--surface) 0%, #000000 100%);
+            padding: 20px;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media(min-width: 768px) {
+            .portal-selector { flex-direction: row; padding: 20px 40px; }
+        }
+
+        .portal-selector h1 {
+            font-size: 1.6rem;
+            letter-spacing: 2px;
+            font-weight: 400;
+            background: linear-gradient(to right, #ffffff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+        @media(min-width: 768px) { .portal-selector h1 { text-align: left; font-size: 1.8rem; } }
+
+        .tabs { display: flex; gap: 10px; z-index: 2; flex-wrap: wrap; justify-content: center; }
+
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-muted);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 10px 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.4s ease;
+            font-size: 0.85rem;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+            background: rgba(212, 175, 55, 0.05);
+            border-color: rgba(212, 175, 55, 0.3);
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            color: #000;
+            font-weight: 600;
+            border-color: var(--accent);
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.25);
+        }
+
+        .app-window {
+            display: none;
+            background-color: var(--surface);
+            border-radius: 20px;
+            min-height: 80vh;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.03);
+            width: 100%;
+        }
+
+        .app-window.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Master Security Portal Overlays --- */
+        .lockout-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 70vh;
+            padding: 20px;
+            background: radial-gradient(circle at center, var(--surface) 0%, var(--primary) 100%);
+        }
+
+        .lockout-box {
+            background: var(--surface-card);
+            padding: 35px 25px;
+            border-radius: 20px;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+            max-width: 400px;
+            width: 100%;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            text-align: center;
+        }
+
+        /* =========================================================
+           1. PREMIUM GUEST COMPANION SUITE
+           ========================================================= */
+        .guest-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--primary);
+            min-height: 80vh;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid rgba(255,255,255,0.03);
+            border-right: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .guest-hero {
+            background: linear-gradient(to bottom, rgba(10,12,16,0.1) 0%, rgba(10,12,16,1) 100%), 
+                        url('https://images.unsplash.com/photo-1540518614846-7eded433c457?w=800&auto=format&fit=crop&q=80');
+            background-size: cover;
+            background-position: center;
+            height: 240px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .guest-hero h2 { font-size: 1.8rem; font-weight: 400; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
+        .guest-hero p { font-size: 0.85rem; color: var(--accent); font-weight: 500; letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
+
+        .guest-content { padding: 20px; flex: 1; }
+
+        .section-headline {
+            font-size: 0.8rem;
+            color: var(--accent);
+            margin: 25px 0 15px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-headline::after { content: ''; flex: 1; height: 1px; background: rgba(212,175,55,0.15); }
+
+        .guest-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+        .guest-card {
+            background: var(--surface);
+            padding: 18px 12px;
+            border-radius: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.02);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
+        .guest-card:hover {
+            transform: translateY(-3px);
+            background: var(--surface-card);
+            border-color: rgba(212,175,55,0.3);
+        }
+
+        .guest-card .icon { font-size: 2rem; margin-bottom: 10px; display: block; }
+        .guest-card span { font-size: 0.85rem; font-weight: 500; color: var(--text-main); }
+
+        /* Dynamic Custom Media Ads Banner */
+        .promo-banner {
+            background-size: cover;
+            background-position: center;
+            border-radius: 14px;
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+            border-left: 4px solid var(--accent);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        .promo-inner { padding: 25px 20px; position: relative; z-index: 2; background: linear-gradient(to right, rgba(0,0,0,0.85), rgba(0,0,0,0.4)); }
+        .promo-banner h4 { font-size: 1.05rem; font-weight: 500; color: var(--accent); margin-bottom: 6px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .promo-banner p { font-size: 0.8rem; color: #fff; line-height: 1.4; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+
+        /* Forms & Interactive Overlays */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85); z-index: 200; align-items: flex-end;
+            backdrop-filter: blur(8px); justify-content: center; width: 100%;
+        }
+
+        .modal-content {
+            background: var(--surface); width: 100%; max-width: 500px; border-top-left-radius: 24px;
+            border-top-right-radius: 24px; padding: 25px; max-height: 90vh; overflow-y: auto;
+            border-top: 2px solid var(--accent);
+        }
+
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .modal-header h3 { font-weight: 400; letter-spacing: 1px; color: #fff; font-size: 1.2rem; }
+        .close-btn { font-size: 1.8rem; cursor: pointer; color: var(--text-muted); }
+        .close-btn:hover { color: var(--danger); }
+
+        .food-scroll-container { display: flex; flex-direction: column; gap: 15px; margin-top: 10px; }
+        
+        .food-item-card {
+            display: flex; background: var(--surface-card); border-radius: 12px;
+            overflow: hidden; border: 1px solid rgba(255,255,255,0.02);
+        }
+
+        .food-img { width: 95px; height: 95px; object-fit: cover; }
+        .food-details { padding: 12px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .food-title { font-weight: 500; font-size: 0.9rem; color: #fff; }
+        .food-price { font-size: 0.85rem; color: var(--accent); font-weight: 600; }
+
+        .form-control {
+            width: 100%; padding: 12px 14px; margin-bottom: 15px;
+            background: var(--primary); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px; font-size: 0.9rem; color: #fff; transition: all 0.3s;
+        }
+        .form-control:focus { border-color: var(--accent); outline: none; }
+        .room-highlight-input { border: 1px solid var(--accent) !important; background: rgba(212,175,55,0.03); text-align: center; font-weight: bold; }
+
+        .submit-action {
+            width: 100%; background: var(--accent); color: #000; border: none;
+            padding: 14px; border-radius: 8px; cursor: pointer; font-weight: 600;
+            letter-spacing: 1px; text-transform: uppercase; font-size: 0.85rem; transition: all 0.3s;
+        }
+        .submit-action:hover { background: var(--accent-hover); }
+        .emergency-btn { background: var(--danger) !important; color: white !important; }
+
+        .chat-box {
+            height: 220px; background: var(--primary); border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px; padding: 15px; overflow-y: auto; margin-bottom: 15px;
+        }
+        .chat-msg { margin-bottom: 10px; padding: 10px 14px; border-radius: 12px; max-width: 85%; font-size: 0.85rem; line-height: 1.4; }
+        .chat-msg.guest { background: rgba(212,175,55,0.15); color: var(--accent-hover); margin-left: auto; border-bottom-right-radius: 2px; }
+        .chat-msg.staff { background: var(--surface-card); color: var(--text-main); border-bottom-left-radius: 2px; }
+
+        /* =========================================================
+           2. RECEPTION MATRIX DASHBOARD (FULLY RESPONSIVE)
+           ========================================================= */
+        .dashboard-layout { display: flex; flex-direction: column; min-height: 80vh; }
+        
+        @media(min-width: 992px) {
+            .dashboard-layout { display: grid; grid-template-columns: 320px 1fr; }
+        }
+        
+        .sidebar { 
+            background: #090b0e; padding: 25px 20px; 
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        @media(min-width: 992px) {
+            .sidebar { border-bottom: none; border-right: 1px solid rgba(255,255,255,0.04); }
+        }
+
+        .sidebar h3 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin-bottom: 20px; padding-bottom: 8px; border-bottom: 1px solid rgba(212,175,55,0.15); }
+        
+        .room-matrix-container {
+            display: flex; flex-direction: column; gap: 15px; max-height: 350px; overflow-y: auto; padding-right: 5px;
+        }
+        @media(min-width: 992px) { .room-matrix-container { max-height: 70vh; } }
+
+        .room-grid-display { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+        @media(min-width: 992px) { .room-grid-display { grid-template-columns: repeat(3, 1fr); } }
+        
+        .room-cell {
+            background: var(--surface); border: 1px solid rgba(255,255,255,0.03);
+            padding: 10px 6px; border-radius: 6px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 6px; font-size: 0.75rem; font-weight: 600;
+        }
+        .room-cell span { color: var(--text-main); }
+        
+        .dot-status { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+        .dot-status.vacant { background: rgba(255,255,255,0.15); }
+        .dot-status.occupied { background: var(--success); box-shadow: 0 0 6px var(--success); }
+        .dot-status.alert { background: var(--danger); box-shadow: 0 0 8px var(--danger); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+
+        .main-dash { padding: 20px; background: linear-gradient(180deg, var(--surface) 0%, #0e1116 100%); flex: 1; display: flex; flex-direction: column; gap: 20px; }
+        @media(min-width: 768px) { .main-dash { padding: 35px; gap: 25px; } }
+
+        .dash-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .dash-header h2 { font-weight: 400; font-size: 1.4rem; letter-spacing: 0.5px; }
+        
+        .feed-grid { display: grid; grid-template-columns: 1fr; gap: 20px; width: 100%; }
+        @media(min-width: 768px) { .feed-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media(min-width: 1400px) { .feed-grid { grid-template-columns: repeat(4, 1fr); } }
+
+        .feed-box { 
+            background: var(--surface-card); border-radius: 16px; padding: 20px; 
+            border: 1px solid rgba(255,255,255,0.02); display: flex; flex-direction: column; height: 350px;
+        }
+        .feed-box h4 { border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px; margin-bottom: 15px; font-weight: 500; font-size: 0.95rem; color: #fff; display: flex; justify-content: space-between; align-items: center; }
+        .counter-badge { background: rgba(212, 175, 55, 0.12); color: var(--accent-hover); padding: 3px 9px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; border: 1px solid rgba(212,175,55,0.15); }
+        
+        .feed-list { display: flex; flex-direction: column; gap: 10px; overflow-y: auto; flex: 1; padding-right: 4px; }
+        .feed-item { padding: 12px; background: var(--primary); border-left: 3px solid var(--accent); border-radius: 6px; font-size: 0.8rem; color: var(--text-main); line-height: 1.4; word-break: break-word; }
+        .feed-item.urgent { border-left-color: var(--danger); background: rgba(244, 63, 94, 0.04); }
+        .feed-item .time { color: var(--text-muted); font-size: 0.7rem; float: right; margin-left: 8px; }
+        .feed-item .action-done-btn { background: transparent; border: 1px solid var(--success); color: var(--success); padding: 3px 8px; border-radius: 4px; cursor: pointer; float: right; margin-top: 8px; font-size: 0.7rem; font-weight: 600; }
+        .feed-item .action-done-btn:hover { background: var(--success); color: #000; }
+
+        /* =========================================================
+           3. MANAGER CONTROL MATRIX
+           ========================================================= */
+        .manager-metrics { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        @media(min-width: 768px) { .manager-metrics { grid-template-columns: repeat(4, 1fr); gap: 20px; } }
+        
+        .metric-card { background: var(--surface-card); padding: 20px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.02); }
+        .metric-card h5 { color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
+        .metric-card .value { font-size: 1.4rem; font-weight: 400; color: #fff; margin-top: 8px; font-family: system-ui; }
+        
+        .chart-container { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media(min-width: 992px) { .chart-container { grid-template-columns: 2fr 1fr; } }
+        .chart-box-wrap { background: var(--surface-card); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.02); }
+        .chart-box-wrap h4 { font-weight: 400; margin-bottom: 15px; font-size: 0.95rem; color: var(--accent); }
+    </style>
+</head>
+<body>
+
+    <!-- Unified Router Header Element -->
+    <div class="portal-selector">
+        <div>
+            <h1>Miracle Hotel</h1>
+            <p style="font-size:0.75rem; color: var(--text-muted); text-align: center; font-family: system-ui;">Boutique 30-Key Real-Time Operating Core — Addis Ababa</p>
+        </div>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('guest-app')">📱 Guest Portal</button>
+            <button class="tab-btn" onclick="switchTab('reception-dash')">🗔 Reception Hub</button>
+            <button class="tab-btn" onclick="switchTab('manager-dash')">📈 Management System</button>
+        </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- 1. GUEST APP SUITE INTERFACE                               -->
+    <!-- ========================================================== -->
+    <div id="guest-app" class="app-window active">
+        <div class="guest-container">
+            <div class="guest-hero">
+                <h2>Welcome Premium Guest</h2>
+                <p>Digital Room Concierge System</p>
+            </div>
+            
+            <div class="guest-content">
+                <!-- Dynamic Executive Ad Banner -->
+                <div id="guest-ad-banner" class="promo-banner" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.85)), url('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&auto=format&fit=crop&q=80');">
+                    <div class="promo-inner">
+                        <h4 id="ad-banner-title">Welcome to Miracle Hotel</h4>
+                        <p id="ad-banner-desc">Experience maximum luxury and refinement at the heart of Addis Ababa, Ethiopia.</p>
+                    </div>
+                </div>
+
+                <div class="section-headline">In-Suite Culinary Delivery</div>
+                <div class="guest-grid">
+                    <div class="guest-card" onclick="openModal('menu-modal')">
+                        <span class="icon">🥂</span>
+                        <span>Order Dining</span>
+                    </div>
+                    <div class="guest-card" onclick="openModal('facility-modal')">
+                        <span class="icon">🧘</span>
+                        <span>Spa & Facilities</span>
+                    </div>
+                </div>
+
+                <div class="section-headline">Room Comfort & Housekeeping</div>
+                <div class="guest-grid">
+                    <div class="guest-card" onclick="openRoomValidationModal('Room Cleaning Request')">
+                        <span class="icon">🧹</span>
+                        <span>Clean Suite</span>
+                    </div>
+                    <div class="guest-card" onclick="openRoomValidationModal('Laundry Service Pickup')">
+                        <span class="icon">🧺</span>
+                        <span>Valet Laundry</span>
+                    </div>
+                    <div class="guest-card" onclick="openModal('amenities-modal')">
+                        <span class="icon">🧴</span>
+                        <span>Extra Amenities</span>
+                    </div>
+                    <div class="guest-card" onclick="openModal('maintenance-modal')">
+                        <span class="icon">🛠️</span>
+                        <span>Report Issue</span>
+                    </div>
+                </div>
+
+                <div class="section-headline">Concierge & Assistance</div>
+                <div class="guest-grid">
+                    <div class="guest-card" onclick="openModal('airport-modal')">
+                        <span class="icon">🛬</span>
+                        <span>Airport VIP Shuttle</span>
+                    </div>
+                    <div class="guest-card" onclick="openModal('chat-modal')">
+                        <span class="icon">💬</span>
+                        <span>Front Desk Chat</span>
+                    </div>
+                    <div class="guest-card emergency-btn" onclick="openModal('emergency-modal')">
+                        <span class="icon">🚨</span>
+                        <span>Emergency Call</span>
+                    </div>
+                    <div class="guest-card" onclick="openModal('feedback-modal')">
+                        <span class="icon">✨</span>
+                        <span>Rate Stay</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACTIVE SYSTEM OVERLAYS -->
+        <div id="quick-room-modal" class="modal"><div class="modal-content">
+            <div class="modal-header"><h3>Verify Suite Number</h3><span class="close-btn" onclick="closeModal('quick-room-modal')">&times;</span></div>
+            <input type="hidden" id="hidden-request-type">
+            <label style="font-size:0.8rem; color: var(--text-muted); margin-bottom: 5px; display: block;">Enter Room Number (1 - 30):</label>
+            <input type="number" id="quick-room-num" class="form-control room-highlight-input" min="1" max="30" placeholder="e.g. 14" required>
+            <button class="submit-action" onclick="submitQuickRoomValidatedRequest()">Dispatch Request</button>
+        </div></div>
+
+        <!-- Menu Modal -->
+        <div id="menu-modal" class="modal"><div class="modal-content">
+            <div class="modal-header"><h3>Miracle Culinary Menu</h3><span class="close-btn" onclick="closeModal('menu-modal')">&times;</span></div>
+            <div style="background: var(--surface-card); padding: 12px; border-radius: 10px; margin-bottom: 15px;">
+                <label style="font-size:0.8rem; color: var(--accent); font-weight: bold;">Room Number Allocation:</label>
+                <input type="number" id="food-room-num" class="form-control room-highlight-input" min="1" max="30" style="margin-top:8px; margin-bottom:0;" placeholder="Room (1-30)">
+            </div>
+            <div class="food-scroll-container" id="guest-menu-container">
+                <!-- Static Fallback Items will instantly combine with custom reception injections -->
+                <div class="food-item-card">
+                    <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200" class="food-img">
+                    <div class="food-details">
+                        <div class="food-title">Prime Wagyu Beef Burger</div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span class="food-price">1,250 ETB</span>
+                            <button class="submit-action" style="width:auto; padding:5px 12px; font-size:0.75rem;" onclick="orderFood('Prime Wagyu Beef Burger', 1250)">Order</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="food-item-card">
+                    <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=200" class="food-img">
+                    <div class="food-details">
+                        <div class="food-title">Traditional Habesha Coffee Ceremony</div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span class="food-price">180 ETB</span>
+                            <button class="submit-action" style="width:auto; padding:5px 12px; font-size:0.75rem;" onclick="orderFood('Traditional Habesha Coffee', 180)">Order</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div></div>
+
+        <!-- Remaining Core Modular Content Engines -->
+        <div id="amenities-modal" class="modal"><div class="modal-content">
+            <div class="modal-header"><h3>Luxury Linen & Toiletries</h3><span class="close-btn" onclick="closeModal('amenities-modal')">&times;</span></div>
+            <input type="number" id="amenities-room-num" class="form-control room-highlight-input" min="1" max="30" placeholder="Room #">
+            <button class="submit-action" style="margin-bottom:12px;" onclick="triggerAmenityRequest('Extra Premium Towels')">Request Fresh Towels</button>
+            <button class="submit-action" onclick="triggerAmenityRequest('Luxury Amenity Restock')">Request Amenity Kit</button>
+        </div></div>
+
+        <div id="maintenance-modal" class="modal"><div class="modal-content">
+            <div class="modal-header"><h3>Report Suite Discrepancy</h3><span class="close-btn" onclick="closeModal('maintenance-modal')">&times;</span></div>
+            <input type="number" id="maint-room-num" class="form-control room-highlight-input" min="1" max="30" placeholder="Room #">
+            <textarea id="maintenance-text" class="form-control" style="height:100px;" placeholder="Describe technical issue..."></textarea>
+            <button class="submit-action" onclick="submitMaintenance()">Dispatch Engineer</button>
+        </div></div>
+
+        <div id="facility-modal" class="modal"><div class="modal-content">
+            <div class="modal-header"><h3>Wellness Reservation Matrix</h3><span class="close-btn" onclick="closeModal('facility-modal')">&times;</span></div>
+            <input type="number" id="fac-room-num" class="form-control room-highlight-input" min="1" max="30" placeholder="Room #">
+            <select id="fac-type" class="form-control"><option>Deep Tissue Massage</option><option>Private Wellness Steam & Sauna</option></select>
+            <button class="submit-action" onclick="submitFacility()">Confirm Booking</button>
+        </div></div>
+
+        <div id="airport-modal" class="modal"><div class="modal-content">
+            <div class="modal-header"><h3>VIP Airport Transit Route</h3><span class="close-btn" onclick="closeModal('airport-modal')">&times;</span></div>
+            <input type="number" id="airport-room-num" class="form-control room-highlight-input" min="1" max="30" placeholder="Room #">
+            <input type="text" id="flight-detail" class="form-control" placeholder="e.g. Ethiopian Airlines ET 501 - 09:30 AM">
+            <button class="submit-action" onclick="submitAirport()">Schedule Shauffeur Connection</button>
+        </div></div>
+
+        <div id="chat-modal" class="modal"><div class="modal-content">
+            <div class="modal-header"><h3>Elite Concierge Messenger</h3><span class="close-btn" onclick="closeModal('chat-modal')">&times;</span></div>
+            <input type="number" id="chat-room-num" class="form-control room-highlight-input" min="1" max="30" placeholder="Verify Room Number">
+            <div class="chat-box" id="chat-box-area"></div>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="chat-input" class="form-control" style="margin:0;" placeholder="Type your request...">
+                <button class="submit-action" style="width:auto; padding:0 20px;" onclick="sendChatMessage()">Send</button>
+            </div>
+        </div></div>
+
+        <div id="emergency-modal" class="modal"><div class="modal-content">
+            <div class="modal-header"><h3>🚨 Emergency Protocol</h3><span class="close-btn" onclick="closeModal('emergency-modal')">&times;</span></div>
+            <input type="number" id="emergency-room-num" class="form-control room-highlight-input" min="1" max="30" placeholder="CRITICAL ROOM #">
+            <button class="submit-action emergency-btn" onclick="triggerEmergency()">SEND FIRST RESPONDERS</button>
+        </div></div>
+
+        <div id="feedback-modal" class="modal"><div class="modal-content">
+            <div class="modal-header"><h3>Stay Assessment Registry</h3><span class="close-btn" onclick="closeModal('feedback-modal')">&times;</span></div>
+            <input type="number" id="feed-room-num-val" class="form-control room-highlight-input" min="1" max="30" placeholder="Room #">
+            <select id="feed-rating" class="form-control"><option>⭐⭐⭐⭐⭐ (Absolute Refinement)</option><option>⭐⭐⭐⭐ (Highly Exemplary)</option><option>⭐⭐⭐ (Deficient Elements)</option></select>
+            <textarea id="feed-comment" class="form-control" style="height:80px;" placeholder="Add specific notes..."></textarea>
+            <button class="submit-action" onclick="submitFeedback()">Log Assessment</button>
+        </div></div>
+    </div>
+
+
+    <!-- ========================================================== -->
+    <!-- 2. RECEPTION DASHBOARD MATRIX FEED                         -->
+    <!-- ========================================================== -->
+    <div id="reception-dash" class="app-window">
+        <div id="reception-lock" class="lockout-screen">
+            <div class="lockout-box">
+                <h3 style="margin-bottom:20px; font-weight:400;">Concierge Desk Authentication</h3>
+                <input type="password" id="reception-pass-input" class="form-control" style="text-align:center;" placeholder="Enter Access Password">
+                <button class="submit-action" onclick="unlockPortal('reception')">Authorize Node</button>
+            </div>
+        </div>
+
+        <div id="reception-content" class="dashboard-layout" style="display:none;">
+            <!-- Serialized Sidebar 1-30 -->
+            <div class="sidebar">
+                <h3>Key Status Matrix (Rooms 1 - 30)</h3>
+                <div class="room-matrix-container">
+                    <div class="room-grid-display" id="reception-matrix-grid">
+                        <!-- Filled Programmatically 1 to 30 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Operations View Channels -->
+            <div class="main-dash">
+                <!-- Add New Food Tool -->
+                <div style="background: var(--surface-card); padding: 20px; border-radius: 16px; border: 1px solid rgba(212,175,55,0.15)">
+                    <h4 style="color:var(--accent); font-size:0.9rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;">✙ Inject New Menu Offering</h4>
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; align-items: center;">
+                        <input type="text" id="menu-add-title" class="form-control" style="margin:0;" placeholder="Item Title (e.g., Kitfo)">
+                        <input type="number" id="menu-add-price" class="form-control" style="margin:0;" placeholder="Price (ETB)">
+                        <input type="text" id="menu-add-img" class="form-control" style="margin:0;" placeholder="Unsplash Image URL">
+                        <button class="submit-action" onclick="receptionAddMenuTarget()">Push Item Live</button>
+                    </div>
+                </div>
+
+                <div class="dash-header">
+                    <h2>Live Service Operations Dashboard</h2>
+                    <p style="font-weight:600; font-size:0.8rem; color:var(--success);">● ONLINE CONNECTION</p>
+                </div>
+                
+                <div class="feed-grid">
+                    <div class="feed-box">
+                        <h4>Kitchen Orders <span class="counter-badge" id="count-food">0</span></h4>
+                        <div class="feed-list" id="feed-food"></div>
+                    </div>
+                    <div class="feed-box">
+                        <h4>Housekeeping Status <span class="counter-badge" id="count-house">0</span></h4>
+                        <div class="feed-list" id="feed-house"></div>
+                    </div>
+                    <div class="feed-box">
+                        <h4>Logistics & Shuttles <span class="counter-badge" id="count-ops">0</span></h4>
+                        <div class="feed-list" id="feed-ops"></div>
+                    </div>
+                    <div class="feed-box">
+                        <h4>Communications Stream <span class="counter-badge" id="count-msg">0</span></h4>
+                        <div class="feed-list" id="feed-msg"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================================== -->
+    <!-- 3. MANAGER CONTROL CENTER MODULE                           -->
+    <!-- ========================================================== -->
+    <div id="manager-dash" class="app-window">
+        <div id="manager-lock" class="lockout-screen">
+            <div class="lockout-box">
+                <h3 style="margin-bottom:20px; font-weight:400;">Executive Vault Verification</h3>
+                <input type="password" id="manager-pass-input" class="form-control" style="text-align:center;" placeholder="Enter Master Token">
+                <button class="submit-action" onclick="unlockPortal('manager')">Authorize Management</button>
+            </div>
+        </div>
+
+        <div id="manager-content" class="main-dash" style="display:none;">
+            <!-- Ad Placement Component Setup -->
+            <div style="background: var(--surface-card); padding: 25px; border-radius: 16px; border: 1px solid rgba(212,175,55,0.25);">
+                <h4 style="color:var(--accent); font-size:0.95rem; font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:15px;">📣 Control Center: Push Dynamic Live Ad Campaign</h4>
+                <div style="display:grid; grid-template-columns: 1fr; gap:12px;">
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:12px;">
+                        <input type="text" id="ad-upload-title" class="form-control" style="margin:0;" placeholder="Campaign Headline Title">
+                        <input type="text" id="ad-upload-img" class="form-control" style="margin:0;" placeholder="Campaign Image URL (Unsplash)">
+                    </div>
+                    <textarea id="ad-upload-desc" class="form-control" style="margin:0; height:60px;" placeholder="Campaign summary parameters / call to action text details..."></textarea>
+                    <button class="submit-action" onclick="managerUploadAdCampaign()">Deploy Campaign To Guest App Instantly</button>
+                </div>
+            </div>
+
+            <div class="dash-header">
+                <h2>Operational Yield & Management Indexes</h2>
+                <div style="color:var(--accent); font-size:0.8rem; font-weight:600; letter-spacing:1px;">CALIBRATED FISCAL CONTEXT 2026</div>
+            </div>
+
+            <div class="manager-metrics">
+                <div class="metric-card"><h5>Gross Revenue</h5><div class="value" id="mgr-rev">0 ETB</div></div>
+                <div class="metric-card"><h5>Key Occupancy</h5><div class="value" id="occupancy-rate">0.0%</div></div>
+                <div class="metric-card"><h5>Active Tickets</h5><div class="value" id="mgr-orders">0</div></div>
+                <div class="metric-card"><h5>Stay Metrics</h5><div class="value">4.98 / 5.0</div></div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-box-wrap">
+                    <h4>Consolidated Yield Curves</h4>
+                    <canvas id="revenueChart" style="max-height: 250px;"></canvas>
+                </div>
+                <div class="chart-box-wrap">
+                    <h4>Top Food Analytics</h4>
+                    <canvas id="menuChart" style="max-height: 250px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- SYSTEM LOGIC AUTOMATION ENGINE                             -->
+    <!-- ========================================================== -->
+    <script>
+        // --- HIGH-SPEED STORAGE CLOUD REALM ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyD7MfmVhg2eA17qIGif8tD1ZSdpd0Lmf2w",
+            authDomain: "miracle-hotel.firebaseapp.com",
+            projectId: "miracle-hotel",
+            storageBucket: "miracle-hotel.firebasestorage.app",
+            messagingSenderId: "795555664607",
+            appId: "1:795555664607:web:028fbd792152797b88cf6a",
+            measurementId: "G-EZYVGGWZQ2"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Security Encryption Vectors (Hidden from Plain sight UI context prompts)
+        const SEC_HASH_RECEPTION = "reception123";
+        const SEC_HASH_MANAGER = "manager123";
+
+        let localRoomsState = {};
+
+        // Generate Perfect Sequential Matrix (1 to 30)
+        function initMatrixUILayout() {
+            const gridContainer = document.getElementById('reception-matrix-grid');
+            gridContainer.innerHTML = '';
+            for(let i = 1; i <= 30; i++) {
+                gridContainer.innerHTML += `
+                    <div class="room-cell" id="rm${i}">
+                        <span>RM ${i}</span>
+                        <div class="dot-status vacant"></div>
+                    </div>`;
+                localRoomsState[i] = 'vacant';
+            }
+        }
+        initMatrixUILayout();
+
+        function unlockPortal(portalType) {
+            const inputVal = document.getElementById(`${portalType}-pass-input`).value;
+            const validated = (portalType === 'reception' && inputVal === SEC_HASH_RECEPTION) || 
+                              (portalType === 'manager' && inputVal === SEC_HASH_MANAGER);
+            if (validated) {
+                document.getElementById(`${portalType}-lock`).style.display = 'none';
+                document.getElementById(`${portalType}-content`).style.display = portalType === 'reception' ? 'flex' : 'block';
+                if (portalType === 'manager') renderCharts();
+            } else {
+                alert('Access authorization failed.');
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.app-window').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function openModal(mId) { document.getElementById(mId).style.display = 'flex'; }
+        function closeModal(mId) { document.getElementById(mId).style.display = 'none'; }
+
+        function openRoomValidationModal(requestType) {
+            document.getElementById('hidden-request-type').value = requestType;
+            document.getElementById('quick-room-num').value = '';
+            openModal('quick-room-modal');
+        }
+
+        function getSimulatedTimestamp() {
+            const d = new Date();
+            return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
+        }
+
+        /* --- FIREBASE REAL-TIME CLOUD INTERACTION INJECTIONS --- */
+
+        function submitQuickRoomValidatedRequest() {
+            const roomNum = parseInt(document.getElementById('quick-room-num').value);
+            const requestName = document.getElementById('hidden-request-type').value;
+            if(!roomNum || roomNum < 1 || roomNum > 30) { alert('Enter valid suite destination (1 - 30).'); return; }
+            
+            database.ref('requests/housekeeping').push({ room: roomNum, detail: requestName, time: getSimulatedTimestamp() });
+            alert('Request uploaded.'); closeModal('quick-room-modal');
+        }
+
+        function orderFood(itemName, price) {
+            const roomNum = parseInt(document.getElementById('food-room-num').value);
+            if(!roomNum || roomNum < 1 || roomNum > 30) { alert('Enter room destination configuration parameter.'); return; }
+            
+            database.ref('requests/food').push({ room: roomNum, detail: `1x ${itemName}`, price: price, time: getSimulatedTimestamp() });
+            database.ref('metrics/revenue').transaction(c => (c || 0) + price);
+            database.ref('metrics/orders').transaction(c => (c || 0) + 1);
+
+            alert(`Order deployed to kitchen for Room ${roomNum}.`); closeModal('menu-modal');
+        }
+
+        function triggerAmenityRequest(typeString) {
+            const roomNum = parseInt(document.getElementById('amenities-room-num').value);
+            if(!roomNum || roomNum < 1 || roomNum > 30) { alert('Verification check failed.'); return; }
+
+            database.ref('requests/housekeeping').push({ room: roomNum, detail: `Requested: ${typeString}`, time: getSimulatedTimestamp() });
+            alert(`Logistics alert broadcasted.`); closeModal('amenities-modal');
+        }
+
+        function submitMaintenance() {
+            const roomNum = parseInt(document.getElementById('maint-room-num').value);
+            const text = document.getElementById('maintenance-text').value;
+            if(!roomNum || !text || roomNum < 1 || roomNum > 30) { alert('Review parameters entry data.'); return; }
+
+            database.ref('requests/messages').push({ room: roomNum, detail: `[MAINTENANCE TASK] ${text}`, urgent: true, time: getSimulatedTimestamp() });
+            alert('Work order dispatched.'); closeModal('maintenance-modal');
+            document.getElementById('maintenance-text').value = '';
+        }
+
+        function submitFacility() {
+            const roomNum = parseInt(document.getElementById('fac-room-num').value);
+            const venue = document.getElementById('fac-type').value;
+            if(!roomNum || roomNum < 1 || roomNum > 30) { alert('Invalid Room.'); return; }
+
+            database.ref('requests/logistics').push({ room: roomNum, detail: `Spa Reservation: ${venue}`, time: getSimulatedTimestamp() });
+            alert('Booking assigned.'); closeModal('facility-modal');
+        }
+
+        // RECEPTION MATRIX ACTION: Add Custom Food Offer
+        function receptionAddMenuTarget() {
+            const title = document.getElementById('menu-add-title').value;
+            const price = parseInt(document.getElementById('menu-add-price').value);
+            let imgUrl = document.getElementById('menu-add-img').value.trim();
+
+            if(!title || !price) { alert('Provide menu item name and price parameters.'); return; }
+            if(!imgUrl) imgUrl = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200";
+
+            database.ref('custom_menu').push({ title: title, price: price, img: imgUrl });
+            alert(`"${title}" injected live into Guest Suite menus.`);
+            
+            document.getElementById('menu-add-title').value = '';
+            document.getElementById('menu-add-price').value = '';
+            document.getElementById('menu-add-img').value = '';
+        }
+
+        // EXECUTIVE PORTAL CONTROL: Manager Upload Campaign Ad
+        function managerUploadAdCampaign() {
+            const title = document.getElementById('ad-upload-title').value.trim();
+            const img = document.getElementById('ad-upload-img').value.trim();
+            const desc = document.getElementById('ad-upload-desc').value.trim();
+
+            if(!title || !img || !desc) { alert('Ensure all campaign data fields are specified.'); return; }
+
+            database.ref('campaign_ad').set({ title: title, img: img, desc: desc });
+            alert('Dynamic ad layout synced globally.');
+
+            document.getElementById('ad-upload-title').value = '';
+            document.getElementById('ad-upload-img').value = '';
+            document.getElementById('ad-upload-desc').value = '';
+        }
+
+        function submitAirport() {
+            const roomNum = parseInt(document.getElementById('airport-room-num').value);
+            const details = document.getElementById('flight-detail').value;
+            if(!roomNum || !details || roomNum < 1 || roomNum > 30) { alert('Error in routing entry log.'); return; }
+
+            database.ref('requests/logistics').push({ room: roomNum, detail: `VIP Shuttling: ${details}`, time: getSimulatedTimestamp() });
+            alert('Airport transit log mapped.'); closeModal('airport-modal');
+            document.getElementById('flight-detail').value = '';
+        }
+
+        function sendChatMessage() {
+            const roomNum = parseInt(document.getElementById('chat-room-num').value);
+            const msg = document.getElementById('chat-input').value;
+            if(!roomNum || !msg || roomNum < 1 || roomNum > 30) { alert('Verify Room Number configuration.'); return; }
+
+            database.ref('requests/messages').push({ room: roomNum, detail: `[LIVE CHAT] ${msg}`, time: getSimulatedTimestamp() });
+            document.getElementById('chat-input').value = '';
+        }
+
+        function triggerEmergency() {
+            const roomNum = parseInt(document.getElementById('emergency-room-num').value);
+            if(!roomNum || roomNum < 1 || roomNum > 30) { alert('Verification index needed.'); return; }
+
+            database.ref('requests/messages').push({ room: roomNum, detail: `⚠️ EMERGENCY DISTRESS ESCALATION INITIATED!`, urgent: true, time: getSimulatedTimestamp() });
+            alert('🚨 PROTOCOL DEPLOYED.'); closeModal('emergency-modal');
+        }
+
+        function submitFeedback() {
+            const roomNum = parseInt(document.getElementById('feed-room-num-val').value);
+            const stars = document.getElementById('feed-rating').value;
+            const text = document.getElementById('feed-comment').value;
+            if(!roomNum || roomNum < 1 || roomNum > 30) { alert('Missing Suite context.'); return; }
+
+            database.ref('requests/messages').push({ room: roomNum, detail: `[FEEDBACK REPORT] Rate: ${stars} | Notes: ${text}`, time: getSimulatedTimestamp() });
+            alert('Evaluation logged.'); closeModal('feedback-modal');
+            document.getElementById('feed-comment').value = '';
+        }
+
+
+        /* --- DYNAMIC DATA PIPELINES (REAL-TIME LISTENING ENGINE) --- */
+        
+        function updateSuiteStatusNode(roomNumber, state) {
+            const targetCell = document.getElementById(`rm${roomNumber}`);
+            if(targetCell) {
+                const indicator = targetCell.querySelector('.dot-status');
+                indicator.className = `dot-status ${state}`;
+                localRoomsState[roomNumber] = state;
+                calculateOccupancyIndex();
+            }
+        }
+
+        function calculateOccupancyIndex() {
+            let occupied = 0;
+            for(let i = 1; i <= 30; i++) {
+                if(localRoomsState[i] === 'occupied' || localRoomsState[i] === 'alert') occupied++;
+            }
+            document.getElementById('occupancy-rate').innerText = ((occupied / 30) * 100).toFixed(1) + '%';
+        }
+
+        function runDynamicSyncEngine() {
+            // Live Synchronized Custom Menu Pipeline
+            database.ref('custom_menu').on('value', snapshot => {
+                const guestMenu = document.getElementById('guest-menu-container');
+                // Retain default legacy favorites, append dynamic reception ones safely
+                guestMenu.innerHTML = `
+                    <div class="food-item-card">
+                        <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200" class="food-img">
+                        <div class="food-details">
+                            <div class="food-title">Prime Wagyu Beef Burger</div>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span class="food-price">1,250 ETB</span>
+                                <button class="submit-action" style="width:auto; padding:5px 12px; font-size:0.75rem;" onclick="orderFood('Prime Wagyu Beef Burger', 1250)">Order</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="food-item-card">
+                        <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=200" class="food-img">
+                        <div class="food-details">
+                            <div class="food-title">Traditional Habesha Coffee Ceremony</div>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span class="food-price">180 ETB</span>
+                                <button class="submit-action" style="width:auto; padding:5px 12px; font-size:0.75rem;" onclick="orderFood('Traditional Habesha Coffee', 180)">Order</button>
+                            </div>
+                        </div>
+                    </div>`;
+                
+                snapshot.forEach(child => {
+                    const data = child.val();
+                    guestMenu.innerHTML += `
+                        <div class="food-item-card">
+                            <img src="${data.img}" class="food-img" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200'">
+                            <div class="food-details">
+                                <div class="food-title">${data.title}</div>
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span class="food-price">${data.price} ETB</span>
+                                    <button class="submit-action" style="width:auto; padding:5px 12px; font-size:0.75rem;" onclick="orderFood('${data.title}', ${data.price})">Order</button>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+            });
+
+            // Live Dynamic Ad Pipeline
+            database.ref('campaign_ad').on('value', snapshot => {
+                if(snapshot.exists()) {
+                    const data = snapshot.val();
+                    document.getElementById('guest-ad-banner').style.backgroundImage = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.85)), url('${data.img}')`;
+                    document.getElementById('ad-banner-title').innerText = data.title;
+                    document.getElementById('ad-banner-desc').innerText = data.desc;
+                }
+            });
+
+            // Food Requests Feed
+            database.ref('requests/food').on('value', snapshot => {
+                const list = document.getElementById('feed-food'); list.innerHTML = '';
+                snapshot.forEach(child => {
+                    const data = child.val(); updateSuiteStatusNode(data.room, 'occupied');
+                    list.innerHTML += `<div class="feed-item"><span class="time">${data.time}</span><strong>Rm ${data.room}:</strong> ${data.detail}<br><span style="color:var(--accent)">${data.price} ETB</span><button class="action-done-btn" onclick="terminateCloudTicket('requests/food', '${child.key}', ${data.room})">Serve</button></div>`;
+                });
+                postCalculatedCountUpdates();
+            });
+
+            // Housekeeping Requests Feed
+            database.ref('requests/housekeeping').on('value', snapshot => {
+                const list = document.getElementById('feed-house'); list.innerHTML = '';
+                snapshot.forEach(child => {
+                    const data = child.val(); updateSuiteStatusNode(data.room, 'occupied');
+                    list.innerHTML += `<div class="feed-item"><span class="time">${data.time}</span><strong>Rm ${data.room}:</strong> ${data.detail}<button class="action-done-btn" onclick="terminateCloudTicket('requests/housekeeping', '${child.key}', ${data.room})">Done</button></div>`;
+                });
+                postCalculatedCountUpdates();
+            });
+
+            // Logistics Feed
+            database.ref('requests/logistics').on('value', snapshot => {
+                const list = document.getElementById('feed-ops'); list.innerHTML = '';
+                snapshot.forEach(child => {
+                    const data = child.val(); updateSuiteStatusNode(data.room, 'occupied');
+                    list.innerHTML += `<div class="feed-item"><span class="time">${data.time}</span><strong>Rm ${data.room}:</strong> ${data.detail}<button class="action-done-btn" onclick="terminateCloudTicket('requests/logistics', '${child.key}', ${data.room})">Clear</button></div>`;
+                });
+                postCalculatedCountUpdates();
+            });
+
+            // Messages & Critical Communications Feed
+            database.ref('requests/messages').on('value', snapshot => {
+                const list = document.getElementById('feed-msg'); list.innerHTML = '';
+                const chatArea = document.getElementById('chat-box-area'); chatArea.innerHTML = '';
+                
+                snapshot.forEach(child => {
+                    const data = child.val();
+                    if(data.urgent) { updateSuiteStatusNode(data.room, 'alert'); } 
+                    else { updateSuiteStatusNode(data.room, 'occupied'); }
+                    
+                    const styleClass = data.urgent ? 'feed-item urgent' : 'feed-item';
+                    list.innerHTML += `<div class="${styleClass}"><span class="time">${data.time}</span><strong>Rm ${data.room}:</strong> ${data.detail}<button class="action-done-btn" onclick="terminateCloudTicket('requests/messages', '${child.key}', ${data.room})">Dismiss</button></div>`;
+                    
+                    if(data.detail.includes("[LIVE CHAT]")) {
+                        const cleanMsg = data.detail.replace("[LIVE CHAT]", "");
+                        chatArea.innerHTML += `<div class="chat-msg guest"><strong>Room ${data.room}:</strong> ${cleanMsg}</div>`;
+                    }
+                });
+                postCalculatedCountUpdates();
+            });
+
+            database.ref('metrics/revenue').on('value', snap => { document.getElementById('mgr-rev').innerText = (snap.val() || 0).toLocaleString() + ' ETB'; });
+            database.ref('metrics/orders').on('value', snap => { document.getElementById('mgr-orders').innerText = (snap.val() || 0).toLocaleString(); });
+        }
+
+        function terminateCloudTicket(path, key, roomNum) {
+            database.ref(`${path}/${key}`).remove().then(() => { updateSuiteStatusNode(roomNum, 'vacant'); });
+        }
+
+        function postCalculatedCountUpdates() {
+            document.getElementById('count-food').innerText = document.getElementById('feed-food').children.length;
+            document.getElementById('count-house').innerText = document.getElementById('feed-house').children.length;
+            document.getElementById('count-ops').innerText = document.getElementById('feed-ops').children.length;
+            document.getElementById('count-msg').innerText = document.getElementById('feed-msg').children.length;
+        }
+
+        /* --- EXECUTIVE ANALYTICS GRAPH GENERATORS --- */
+        let chartsInitialized = false;
+        function renderCharts() {
+            if(chartsInitialized) return;
+            chartsInitialized = true;
+
+            const ctxRev = document.getElementById('revenueChart').getContext('2d');
+            new Chart(ctxRev, {
+                type: 'line',
+                data: {
+                    labels: ['Mar', 'Apr', 'May (Live)'],
+                    datasets: [
+                        { label: 'Room Yield (ETB)', data: [840000, 790000, 894000], borderColor: '#d4af37', backgroundColor: 'transparent', tension: 0.2 },
+                        { label: 'Concierge Add-ons', data: [160000, 145000, 210000], borderColor: '#f3e5ab', backgroundColor: 'transparent', tension: 0.2 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#fff' } } } }
+            });
+
+            const ctxMenu = document.getElementById('menuChart').getContext('2d');
+            new Chart(ctxMenu, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Burgers', 'Coffee', 'Local Platters', 'Beverages'],
+                    datasets: [{ data: [320, 940, 510, 1200], backgroundColor: ['#d4af37', '#f3e5ab', '#222631', '#171a21'], borderWidth: 0 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#fff' } } } }
+            });
+        }
+
+        runDynamicSyncEngine();
+    </script>
+</body>
+</html>
